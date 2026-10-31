@@ -12,11 +12,18 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private Vector3 movement;
 
+    private Transform mainCamera;
+
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        mainCamera = Camera.main.transform;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible= false;
     }
 
     // Update is called once per frame
@@ -27,7 +34,16 @@ public class PlayerController : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
-        movement = new Vector3(x, 0, z).normalized;
+        Vector3 camForward = mainCamera.forward;
+        Vector3 camRight = mainCamera.right;
+
+        camForward.y = 0;
+        camRight.y = 0;
+        camForward.Normalize();
+        camRight.Normalize();
+        
+        //movement = new Vector3(x, 0, z).normalized;
+        movement = (camForward * z + camRight * x).normalized;
 
         if(movement.magnitude > 0.1f){
             Quaternion targetRotation = Quaternion.LookRotation(movement);
