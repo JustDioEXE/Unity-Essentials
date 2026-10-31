@@ -3,8 +3,10 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed;
-    public float jumpForce;
+    public float moveSpeed = 8;
+    public float turnSpeed = 10;
+    public float jumpForce = 8;
+    public float jumpFreeSpace = 1.1f;
     
     private Rigidbody rb;
     private bool isGrounded;
@@ -20,14 +22,20 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f);
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, jumpFreeSpace);
 
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
-        movement = (transform.right * x + transform.forward * z).normalized;
+        movement = new Vector3(x, 0, z).normalized;
 
-        if(Input.GetButtonDown("Jump")){
+        if(movement.magnitude > 0.1f){
+            Quaternion targetRotation = Quaternion.LookRotation(movement);
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        }
+
+        if(Input.GetButtonDown("Jump") && isGrounded){
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
